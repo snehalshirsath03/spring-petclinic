@@ -30,8 +30,10 @@
     <lifecycle-mapping>1.0.0</lifecycle-mapping>
     <maven-checkstyle.version>3.6.0</maven-checkstyle.version>
     <nohttp-checkstyle.version>0.0.11</nohttp-checkstyle.version>
+    <sonar.projectKey>snehalshirsath03_spring-petclinic</sonar.projectKey>
     <spring-format.version>0.0.47</spring-format.version>
     <sonar.organization>snehalshirsath03</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
 
 
