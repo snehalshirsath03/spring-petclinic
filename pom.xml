@@ -32,6 +32,9 @@
     <nohttp-checkstyle.version>0.0.11</nohttp-checkstyle.version>
     <spring-format.version>0.0.47</spring-format.version>
   </properties>
+<properties>
+  <sonar.organization>snehalshirsath03</sonar.organization>
+</properties>
 
   <licenses>
     <license>
