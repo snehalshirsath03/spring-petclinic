@@ -46,6 +46,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
 
+    env:
+      IMAGE_NAME: spring-petclinic
+      IMAGE_TAG: latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -56,13 +60,17 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
+      - name: Build Docker Image
+        run: |
+          docker build -t $IMAGE_NAME:$IMAGE_TAG .
+
       - name: Tag Image
         run: |
-          docker tag myapp:latest ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+          docker tag $IMAGE_NAME:$IMAGE_TAG ${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:$IMAGE_TAG
 
       - name: Push to ACR
         run: |
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:$IMAGE_TAG
 
       - name: Deploy on Azure VM via SSH (key-based)
         uses: appleboy/ssh-action@v1.0.0
@@ -71,17 +79,19 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
+            set -e
+
             echo "Logging into ACR..."
             sudo docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
 
             echo "Stopping old container (if exists)..."
-            sudo docker stop myapp || true
-            sudo docker rm myapp || true
+            sudo docker stop spring-petclinic || true
+            sudo docker rm spring-petclinic || true
 
             echo "Pulling latest image..."
-            sudo docker pull ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+            sudo docker pull ${{ secrets.ACR_LOGIN_SERVER }}/spring-petclinic:latest
 
             echo "Running new container..."
-            sudo docker run -d -p 8080:8080 --name myapp ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+            sudo docker run -d -p 8080:8080 --name spring-petclinic ${{ secrets.ACR_LOGIN_SERVER }}/spring-petclinic:latest
 
             echo "Deployment completed successfully!"
