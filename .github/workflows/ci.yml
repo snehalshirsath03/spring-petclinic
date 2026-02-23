@@ -44,3 +44,47 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORG }}
             -Dsonar.java.binaries=target
+deploy:
+  runs-on: ubuntu-latest
+  needs: build
+
+  steps:
+    - name: Login to ACR
+      uses: azure/docker-login@v2
+      with:
+        login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+      # azure/docker-login supports login-server/username/password exactly like this [3](https://github.com/Azure/docker-login)
+
+    - name: Tag Image
+      run: |
+        docker tag myapp:latest ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+
+    - name: Push to ACR
+      run: |
+        docker push ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+
+    - name: Deploy on Azure VM via SSH (key-based)
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.VM_HOST }}
+        username: ${{ secrets.VM_USER }}
+        key: ${{ secrets.VM_SSH_KEY }}
+        # port: ${{ secrets.VM_SSH_PORT }}   # optional, default is 22 [2](https://codesandbox.io/p/github/vkimura/appleboy-ssh-action)
+        script: |
+          echo "Logging into ACR..."
+          sudo docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
+
+          echo "Stopping old container (if exists)..."
+          sudo docker stop myapp || true
+          sudo docker rm myapp || true
+
+          echo "Pulling latest image..."
+          sudo docker pull ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+
+          echo "Running new container..."
+          sudo docker run -d -p 8080:8080 --name myapp ${{ secrets.ACR_LOGIN_SERVER }}/myapp:latest
+
+          echo "Deployment completed successfully!"
+
