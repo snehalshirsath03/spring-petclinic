@@ -80,19 +80,21 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             set -e
-
+          
             echo "Logging into ACR..."
             sudo docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} -p ${{ secrets.ACR_PASSWORD }}
-
-            echo "Stopping old container (if exists)..."
+          
+            echo "Stopping old container..."
             sudo docker stop spring-petclinic || true
             sudo docker rm spring-petclinic || true
-
+          
+            echo "Freeing port 8080..."
+            sudo lsof -t -i:8080 | xargs -r sudo kill -9
+          
             echo "Pulling latest image..."
             sudo docker pull ${{ secrets.ACR_LOGIN_SERVER }}/spring-petclinic:latest
-
+          
             echo "Running new container..."
             sudo docker run -d -p 8080:8080 --name spring-petclinic ${{ secrets.ACR_LOGIN_SERVER }}/spring-petclinic:latest
-
+          
             echo "Deployment completed successfully!"
-
