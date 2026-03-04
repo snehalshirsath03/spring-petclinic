@@ -99,8 +99,8 @@ jobs:
           echo "Waiting for LoadBalancer external endpoint..."
 
           for i in {1..60}; do
-            IP=$(kubectl get svc spring-petclinic -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
-            HOST=$(kubectl get svc spring-petclinic -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+            IP=$(kubectl get svc spring-petclinic-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
+            HOST=$(kubectl get svc spring-petclinic-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
 
             if [ -n "$IP" ]; then
               ENDPOINT="$IP"
@@ -118,7 +118,7 @@ jobs:
 
           if [ -z "${ENDPOINT:-}" ]; then
             echo "❌ Could not get LoadBalancer external IP/hostname"
-            kubectl get svc spring-petclinic -o wide || true
+            kubectl get svc spring-petclinic-service -o wide || true
             exit 1
           fi
 
