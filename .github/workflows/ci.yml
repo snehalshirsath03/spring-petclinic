@@ -23,13 +23,13 @@ jobs:
           cache: maven
 
       - name: Build, Test & Coverage
-        run: mvn clean verify
+        run: mvn -B clean verify
 
       - name: Upload JaCoCo Report
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: target/site/jacoco
+          path: target/site/jacoco/
 
       - name: Sonar Scan
         uses: SonarSource/sonarcloud-github-action@v2
@@ -40,7 +40,8 @@ jobs:
           args: >
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORG }}
-            -Dsonar.java.binaries=target
+            -Dsonar.java.binaries=target/classes
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
   deploy:
     runs-on: ubuntu-latest
@@ -53,13 +54,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 🔐 Login to Azure
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # 🔐 Login to ACR
       - name: Login to ACR
         uses: azure/docker-login@v2
         with:
@@ -67,32 +66,26 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # 🐳 Build Image
       - name: Build Docker Image
         run: docker build -t $IMAGE_NAME:$IMAGE_TAG .
 
-      # 🏷 Tag Image
       - name: Tag Image
         run: docker tag $IMAGE_NAME:$IMAGE_TAG ${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:$IMAGE_TAG
 
-      # 📤 Push Image
       - name: Push to ACR
         run: docker push ${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:$IMAGE_TAG
 
-      # ⚙️ Set AKS Context
       - name: Set AKS Context
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
 
-      # 🚀 Deploy to AKS (Rolling Update)
       - name: Deploy to AKS
         run: |
           kubectl set image deployment/spring-petclinic-deployment \
-          spring-petclinic=${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:$IMAGE_TAG
+            spring-petclinic=${{ secrets.ACR_LOGIN_SERVER }}/$IMAGE_NAME:$IMAGE_TAG
 
-      # ✅ Verify Deployment
       - name: Verify
         run: |
           kubectl rollout status deployment/spring-petclinic-deployment
