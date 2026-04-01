@@ -223,6 +223,11 @@
                 </includes>
                 <excludes>
                     <exclude>**/*FunctionalTests.java</exclude>
+	             
+		    <exclude>**/*IntegrationTests.java</exclude>
+    		    <exclude>**/PostgresIntegrationTests.java</exclude>
+    		    <exclude>**/MySqlIntegrationTests.java</exclude>
+
                 </excludes>
             </configuration>
         </plugin>
