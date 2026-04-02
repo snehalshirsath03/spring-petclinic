@@ -3,9 +3,10 @@ kind: Service
 metadata:
   name: spring-petclinic-service
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: spring-petclinic
   ports:
-    - port: 80
+    - port: 8080
       targetPort: 8080
+      nodePort: 30007
