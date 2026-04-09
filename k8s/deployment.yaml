@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: spring-petclinic
+  namespace: petclinic
 spec:
   replicas: 2
   selector:
@@ -13,8 +14,18 @@ spec:
         app: spring-petclinic
     spec:
       containers:
-        - name: spring-petclinic
-          image: spring-petclinic:41
-          imagePullPolicy: IfNotPresent
-          ports:
-            - containerPort: 8080
+      - name: spring-petclinic
+        image: 059325865468.dkr.ecr.ap-south-1.amazonaws.com/spring-petclinic:13
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: 20
+        livenessProbe:
+          httpGet:
+            path: /livez
+            port: 8080
+          initialDelaySeconds: 30
