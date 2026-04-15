@@ -15,8 +15,13 @@ spec:
     spec:
       containers:
       - name: spring-petclinic
+<<<<<<< HEAD
         image: 059325865468.dkr.ecr.ap-south-1.amazonaws.com/spring-petclinic:49
         imagePullPolicy: Always
+=======
+        image: 059325865468.dkr.ecr.ap-south-1.amazonaws.com/spring-petclinic:19
+        imagePullPolicy: IfNotPresent
+>>>>>>> c96ed28 (Fix service type for Minikube (ClusterIP))
         ports:
         - containerPort: 8080
 
