@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: spring-petclinic
-          image: 059325865468.dkr.ecr.ap-south-1.amazonaws.com/spring-petclinic:66
+          image: 059325865468.dkr.ecr.ap-south-1.amazonaws.com/spring-petclinic:67
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
