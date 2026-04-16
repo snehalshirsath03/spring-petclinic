@@ -14,9 +14,16 @@ spec:
         app: spring-petclinic
     spec:
       containers:
+<<<<<<< HEAD
         - name: spring-petclinic
           image: 059325865468.dkr.ecr.ap-south-1.amazonaws.com/spring-petclinic:68
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
 
+=======
+      - name: spring-petclinic
+        image: 059325865468.dkr.ecr.ap-south-1.amazonaws.com/spring-petclinic:48
+        ports:
+        - containerPort: 8080
+>>>>>>> 7313dcd (add)
